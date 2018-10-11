@@ -18,7 +18,37 @@ outputRange(startcell(string format: "AA"|"AA:BB"|"A9:Z1"), direction(string for
 */
 
 const SeekAndReplace = function(){
-  let source, template, result, output/*{startcell : "/wd/",direction : "(x+|x-) || (y+|y-)"}*/;
+  var source, template, result, output/*{startcell : "/wd/",direction : "(x+|x-) || (y+|y-)"}*/;
+  const Output = function(src){
+    var output;
+    if(src){
+      this.setValue(src);
+    }
+    this.isNotValid = function(obj){
+      var message = "";
+      if(obj.startCell && obj.direction){
+        var s = obj.startCell, d = obj.direction;
+        if(typeof(s) === "string" && s.length === 2 && s.replace("[a-z,A-Z]+\d+","").length === 0){
+          if(direction)
+          return undefined;
+        }else{
+          message = "Wrong input, obj.startCell isn't match [a-z,A-Z]+\d+ , or have an extra simbols! \nobj.startCell: "+ obj.startCell;
+      }
+      message = "Wrong input for Output object!: " + JSON.stringify(obj).replace(/,/," ,\n");
+      return message;
+    }
+    this.set = function(src){
+      var diagnose = this.isNotValid(src);
+      if(diagnose){
+        throw new Error(diagnose);
+      }else{
+        output = src;
+      }
+    }
+    this.get = function(){
+      return output;
+    }
+  }
 
   this.setSource = function(range){
     source = this.interpolateRange(range);
@@ -30,6 +60,7 @@ const SeekAndReplace = function(){
   }
   this.setResultOutput = function(startCell, direction){
     //input startcell(string format: "AA"|"AA:BB"|"A9:Z1"), direction(string format: "(x+|x-) || (y+|y-)")
+    output = new Output({startCell, direction})
     output.startCell = interpolateRange(startCell);
     output.direction = direction;
     return this;
